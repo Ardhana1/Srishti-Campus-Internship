@@ -3,41 +3,53 @@ import pandas as pd
 import numpy as np
 import joblib
 import json
+from pathlib import Path
 
+# -------------------------------------------------
+# Page Configuration
+# -------------------------------------------------
 st.set_page_config(
     page_title="Iris Flower Classifier",
     page_icon="🌸",
     layout="wide"
 )
 
-# Load model
+# Base directory (directory containing app2.py)
+BASE_DIR = Path(__file__).parent
+
+
+# -------------------------------------------------
+# Load Resources
+# -------------------------------------------------
 @st.cache_resource
 def load_model():
-    from pathlib import Path
-    import json
-    import streamlit as st
+    model_path = BASE_DIR / "models" / "iris_model.joblib"
+    return joblib.load(model_path)
 
-    @st.cache_resource
-    def load_model_info():
-        info_path = Path(__file__).parent / "models" / "model_info.json"
-
-        with open(info_path, "r") as f:
-            return json.load(f)
 
 @st.cache_resource
 def load_model_info():
-    with open("models/model_info.json", "r") as f:
+    info_path = BASE_DIR / "models" / "model_info.json"
+    with open(info_path, "r") as f:
         return json.load(f)
+
 
 @st.cache_resource
 def load_feature_ranges():
-    with open("models/feature_ranges.json", "r") as f:
+    ranges_path = BASE_DIR / "models" / "feature_ranges.json"
+    with open(ranges_path, "r") as f:
         return json.load(f)
 
+
+# Load everything once
 model = load_model()
 model_info = load_model_info()
 feature_ranges = load_feature_ranges()
 
+
+# -------------------------------------------------
+# UI
+# -------------------------------------------------
 st.title("🌸 Iris Flower Classification")
 
 st.write(
@@ -97,6 +109,10 @@ with col2:
 
     st.dataframe(df, hide_index=True)
 
+
+# -------------------------------------------------
+# Prediction
+# -------------------------------------------------
 if st.button("Predict Species"):
 
     features = np.array([
@@ -113,15 +129,14 @@ if st.button("Predict Species"):
 
     species = model_info["target_names"][prediction]
 
-    st.success(f"Predicted Species: {species}")
+    st.success(f"Predicted Species: **{species}**")
 
     st.subheader("Confidence Scores")
 
     for i, prob in enumerate(probabilities):
-        st.write(
-            f"{model_info['target_names'][i]} : {prob*100:.2f}%"
-        )
+        st.write(f"{model_info['target_names'][i]} : {prob*100:.2f}%")
         st.progress(float(prob))
 
+
 st.markdown("---")
-st.write("Built with Streamlit and Scikit-Learn")
+st.write("Built with ❤️ using Streamlit and Scikit-Learn")
