@@ -15,6 +15,7 @@ st.set_page_config(
 def load_model():
     from pathlib import Path
     import json
+    import streamlit as st
 
     @st.cache_resource
     def load_model_info():
