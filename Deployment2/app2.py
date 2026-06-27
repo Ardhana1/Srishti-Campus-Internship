@@ -14,12 +14,14 @@ st.set_page_config(
 @st.cache_resource
 def load_model():
     from pathlib import Path
-    import joblib
+    import json
 
     @st.cache_resource
-    def load_model():
-        model_path = Path(__file__).parent / "models" / "iris_model.joblib"
-        return joblib.load(model_path)
+    def load_model_info():
+        info_path = Path(__file__).parent / "models" / "model_info.json"
+
+        with open(info_path, "r") as f:
+            return json.load(f)
 
 @st.cache_resource
 def load_model_info():
