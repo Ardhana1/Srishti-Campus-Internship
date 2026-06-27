@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import joblib
 import json
+from pathlib import Path
 
 st.set_page_config(
     page_title="Iris Flower Classifier",
@@ -10,25 +11,34 @@ st.set_page_config(
     layout="wide"
 )
 
+# Base directory (folder containing app2.py)
+BASE_DIR = Path(__file__).resolve().parent
+MODELS_DIR = BASE_DIR / "models"
+
 # Load model
 @st.cache_resource
 def load_model():
-    return joblib.load("models/iris_model.joblib")
+    model_path = MODELS_DIR / "iris_model.joblib"
+    return joblib.load(model_path)
 
 @st.cache_resource
 def load_model_info():
-    with open("models/model_info.json", "r") as f:
+    info_path = MODELS_DIR / "model_info.json"
+    with open(info_path, "r") as f:
         return json.load(f)
 
 @st.cache_resource
 def load_feature_ranges():
-    with open("models/feature_ranges.json", "r") as f:
+    feature_path = MODELS_DIR / "feature_ranges.json"
+    with open(feature_path, "r") as f:
         return json.load(f)
 
+# Load resources
 model = load_model()
 model_info = load_model_info()
 feature_ranges = load_feature_ranges()
 
+# Title
 st.title("🌸 Iris Flower Classification")
 
 st.write(
@@ -90,29 +100,25 @@ with col2:
 
 if st.button("Predict Species"):
 
-    features = np.array([
-        [
-            sepal_length,
-            sepal_width,
-            petal_length,
-            petal_width
-        ]
-    ])
+    features = np.array([[
+        sepal_length,
+        sepal_width,
+        petal_length,
+        petal_width
+    ]])
 
     prediction = model.predict(features)[0]
     probabilities = model.predict_proba(features)[0]
 
     species = model_info["target_names"][prediction]
 
-    st.success(f"Predicted Species: {species}")
+    st.success(f"### 🌼 Predicted Species: **{species}**")
 
     st.subheader("Confidence Scores")
 
     for i, prob in enumerate(probabilities):
-        st.write(
-            f"{model_info['target_names'][i]} : {prob*100:.2f}%"
-        )
+        st.write(f"{model_info['target_names'][i]} : {prob * 100:.2f}%")
         st.progress(float(prob))
 
 st.markdown("---")
-st.write("Built with Streamlit and Scikit-Learn")
+st.write("Built with ❤️ using Streamlit and Scikit-Learn")
